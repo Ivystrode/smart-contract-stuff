@@ -35,7 +35,7 @@ ETHERSCAN/VERIFICATION
     - Make a "test" folder in contracts folder where you will store mock contracts
     - Make your mock contracts in here to use when local/sim chain testing/dev (find & paste the code...)
 
--DEPLOY TO PERSISTENT GANACHE
+- DEPLOY TO PERSISTENT GANACHE
     - Use GUI to create a chain
     - Keep it running & deploy locally - notice it now listens on localhost now spin up its own chain
     - In ganache settings make sure you are using port 8545 otherwise it won't see the chain
