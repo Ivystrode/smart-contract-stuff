@@ -1,5 +1,5 @@
 # to work with addresses:
-from brownie import accounts, config, SimpleStorage
+from brownie import accounts, config, SimpleStorage, network
 
 
 def deploy_simple_storage():
@@ -18,7 +18,7 @@ def deploy_simple_storage():
     # print(account)
     
     #but for now we want to just use the first ganache account
-    account = accounts[0]
+    account = get_account()
     
     #deploy contract to a chain - much quicker than manually with web3.py
     simple_storage = SimpleStorage.deploy({"from":account})
@@ -35,6 +35,14 @@ def deploy_simple_storage():
     print("updated value")
     stored_value = simple_storage.retrieve()
     print(stored_value)
+    
+def get_account():
+    # if working on local chain use account[0]
+    # this depends on what you specify when you run "brownie run scripts/deploy.py" if you add "--network ropsten" for example
+    if (network.show_active() == "development"):
+        return accounts[0]
+    else:
+        return accounts.add(config['wallets']['from_key'])
 
 
 def main():
