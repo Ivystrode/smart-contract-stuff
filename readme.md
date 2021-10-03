@@ -51,7 +51,7 @@ ETHERSCAN/VERIFICATION
     - If you close ganache you lose the chain...you can then delete the [chain id] folder to restart
 
 
-MAINNET FORK
+- MAINNET FORK
     - You can "deploy" to a fork of the mainnet. mainnet-form is recognised by brownie - add it to the networks in the config
     - Verify to False
     - eth-usd price feed you can use the mainnet contract address (https://docs.chain.link/docs/ethereum-addresses/ look under mainnet obviously)
