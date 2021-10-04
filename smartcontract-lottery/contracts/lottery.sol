@@ -41,7 +41,24 @@ contract Lottery is Ownable {
         lottery_state = LOTTERY_STATE.OPEN;
     }
 
-    function endLottery() public {
+    function endLottery() public onlyOwner {
+        // get a random winner - must be a safe random number generator, not exploitable
+        // we can use a globally available variable and hash it to do this on a blockchain (since on a blockchain all nodes must agree on the number...)
+        // see below - we will have to go outside the blockchain to get a truly random number
+        // so we use chainlink VRF
 
     }
 }
+
+
+
+// the problem with making random numbers on the blockchain
+
+// uint(keccak256(                 // <-- hashing algorithm
+//         abi.encodePacked(nonce, // take a bunch of numbers and hash them all together to make a fairly random number
+//         msg.sender,             // but a hashing algo will always hash the same way, so it wont be totally random
+//         block.difficulty, // difficulty can be manipulated by miners
+//         block.timestamp   // timestamp and nonce are predictable as is msg.sender 
+//         );                  // therefore this is not an acceptable way to get a random number as miners can predict it...
+//     )
+// ) % players.length;
