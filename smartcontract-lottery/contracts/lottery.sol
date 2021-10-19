@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Lottery is Ownable {
     address payable[] public players; // "players" is a public list/array of addresses - listing the people who have entered the lottery
     uint256 public usdEntryFee;
-    AggregatorV3Interface internal ethUsdPriceFeed;
+    AggregatorV3Interface internal ethUsdPriceFeed; // variable ethUsdPriceFeed is an AggregatorV3Interface
     enum LOTTERY_STATE {
         OPEN,
         CLOSED,

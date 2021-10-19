@@ -4,8 +4,9 @@
 
 How to test this
 
-1. 'mainnet-fork'
+1. 'mainnet-fork' - run this on LMT DT2:
+    - brownie networks delete mainnet-fork
     - brownie networks add development mainnet-fork cmd=ganache-cli host=http://127.0.0.1 fork=https://eth-mainnet.alchemyapi.io/v2/1Amkjmd_e5uDAVqCg9Clplqmuj5Y5NA0 accounts=10 mnemonic=brownie port=8545
-    - after networks delete mainnet-fork (to delete brownie defaults)
+    - add the alchemyapi connection
 2. 'development with mocks'
 3. 'testnet'
