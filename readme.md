@@ -12,8 +12,8 @@ BROWNIE
         - will be inside a folder named after the chain id of chain it is deployed on
     - brownie run [scriptname] --network [networkname ie ropsten] [functionname - optional]
 
-INFURA
-- Does what? Gives us some api token?
+INFURA and ALCHEMYAIP
+- Gives us an API token to interact with the eth blockchain/a node on the chain to make queries to it (instead of running our own node?)
 
 ETHERSCAN/VERIFICATION
 - Make an account to get an API key to verify contracts
@@ -52,7 +52,7 @@ ETHERSCAN/VERIFICATION
 
 
 - MAINNET FORK
-    - You can "deploy" to a fork of the mainnet. mainnet-form is recognised by brownie - add it to the networks in the config
+    - You can "deploy" to a fork of the mainnet. mainnet-fork is recognised by brownie - add it to the networks in the config
     - Verify to False
     - eth-usd price feed you can use the mainnet contract address (https://docs.chain.link/docs/ethereum-addresses/ look under mainnet obviously)
     - No wait...call mainnet-fork mainnet-fork-dev (make sure to add this to helpful_scripts)
