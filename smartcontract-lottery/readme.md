@@ -10,3 +10,17 @@ How to test this
     - add the alchemyapi connection
 2. 'development with mocks'
 3. 'testnet'
+
+The setup
+
+1. brownie init - starts new brownie project
+2. add dependencies to brownie-config.yaml & remappings
+3. brownie compile to test the sol file
+4. delete brownie inbuilt internal mainnet fork - brownie networks delete mainnet-fork
+5. using alchemy as our ethereum connection - create an app and get the API key
+6. brownie networks add development mainnet-fork cmd=ganache-cli host=http://127.0.0.1 fork=[alchemyhttp] accounts=10 mnemonic=brownie port=8545
+7. test - write test script and run brownie test --network mainnet-fork
+
+8. Using LINK oracles & services - for testnets we can acquire this from faucets, look at chainlink docs to find testnet ETH and LINK faucets
+9. One such service is random number generation - the random number contract costs LINK to use!
+10. This follows the Request and Receive cycle of getting data...TWO transactions take place. One is the request from the contract to the off chain server (chainlink node) rand generator, the other (receive) is the callback function of the caller contract. Just like how we made the oracle/caller contract in cryptozombies. Our callback function in this case is the fulfilling randomness function that the chainlink node calls to give the rnadom number to the contract...
