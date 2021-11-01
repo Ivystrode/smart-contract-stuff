@@ -2,7 +2,7 @@ from scripts.helpful_scripts import get_account, get_contract
 from brownie import Lottery, network
 
 def deploy_lottery():
-    account = get_account(id="ropsten_2_account")
+    account = get_account(id="ben")
     lottery = Lottery.deploy(
         get_contract("eth_usd_price_feed")
     )

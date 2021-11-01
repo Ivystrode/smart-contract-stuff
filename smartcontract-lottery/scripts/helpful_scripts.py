@@ -13,6 +13,9 @@ def get_account(index=None, id=None):
     otherwise we will use accounts.load("id")
     if working on local chain use account[0]
     this depends on what you specify when you run "brownie run scripts/deploy.py" if you add "--network ropsten" for example
+    On LMT-Desktop (#1) we have an account id of "ben" with the account (public address) ending af29 - which is the main account for all chains
+    I am using for testing
+    I need to put this on LMT-Desktop-2 as well
     """
     
     if index:
