@@ -1,7 +1,8 @@
-from brownie import network, accounts, config, MockV3Aggregator
+from brownie import network, accounts, config, MockV3Aggregator, VRFCoordinatorMock, LinkToken, Contract
 from web3 import Web3
 
 DECIMALS = 18 # most cryptos (all ERC20) use 18
+INITIAL_VALUE = 200000000000
 STARTING_PRICE = 200000000000
 
 FORKED_LOCAL_ENVIRONMENTS = ['mainnet-fork', 'mainnet-fork-dev']
@@ -25,23 +26,14 @@ def get_account(index=None, id=None):
     else:
         return accounts[0]
 
-    
-def deploy_mocks():
-    """
-    If we are on a local chain we don't have access to oracles/price feeds
-    Therefore we need to deploy them to the local chain so our contract
-    will work in local testing
-    """
-    
-    print(f"The active network is: {network.show_active()}")
-    print(f"Deploying mocks...")
-    if len(MockV3Aggregator) <= 0: # only deploy if we haven't deployed one already
-        mock_aggregator = MockV3Aggregator.deploy(DECIMALS, STARTING_PRICE, {"from": get_account()}) # toWei adds 18 decimals to 2000 to be compatible with ethereum
-    print("Mocks deployed")
-    
+
+
+# MOCK CONTRACT MAPPINGS:
 # we have to map the contract type to a name
 # anytime we see ["eth_usd_price_feed"] we know its a mockv3aggregator - we need to deploy a mock
-contract_to_mock = {"eth_usd_price_feed": MockV3Aggregator}
+contract_to_mock = {"eth_usd_price_feed": MockV3Aggregator,
+                    "vrf_coordinator": VRFCoordinatorMock,
+                    "link_token": LinkToken}
     
 def get_contract(contract_name):
     """
@@ -53,3 +45,29 @@ def get_contract(contract_name):
     deployed version of this contract - ie MockV3Aggregator[-1])
     """
     contract_type = contract_to_mock[contract_name]
+    
+    # check if we even need to deploy a mock - if we are on a local chain
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        if len(contract_type) <= 0: #eg if MockV3Aggregator.length is 0 ie none are deployed on the local chain yet
+            deploy_mocks() 
+            
+        contract = contract_type[-1] # get the latest of that contract (eg MockV3Aggregator[-1]) - if we deployed above then it will be that one
+    # for deploying to a testnet:
+    else:
+        contract_address = config["networks"][network.show_active()][contract_name]
+        # address & ABI
+        contract = Contract.from_abi(contract_type._name, contract_address, contract_type._abi) # allows us to get a ctract from its abi and address
+    return contract
+            
+    
+def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_VALUE):
+    """
+    If we are on a local chain we don't have access to oracles/price feeds
+    Therefore we need to deploy them to the local chain so our contract
+    will work in local testing
+    """
+    
+    account = get_account()
+    MockV3Aggregator.deploy(decimals, initial_value, {"from":account})
+    print("Deploy mock")
+    

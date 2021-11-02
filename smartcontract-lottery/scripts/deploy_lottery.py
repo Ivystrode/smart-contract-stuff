@@ -1,11 +1,18 @@
 from scripts.helpful_scripts import get_account, get_contract
-from brownie import Lottery, network
+from brownie import Lottery, network, config
 
 def deploy_lottery():
-    account = get_account(id="ben")
+    account = get_account(id="ropsten_2_account")
     lottery = Lottery.deploy(
-        get_contract("eth_usd_price_feed")
+        get_contract("eth_usd_price_feed").address,# constructor of lottery.sol "priceFeedAddress"
+        get_contract("vrf_coordinator").address,# need to map this to what its mock needs to be ...
+        get_contract("link_token").address, # the chainlink token...
+        config['networks'][network.show_active()]['fee'], # get the preset ones in brownie-config
+        config['networks'][network.show_active()]['keyhash'],
+        {"from":account},
+        publich_source=config['networks'][network.show_active()].get('verify', False) # get the verify key - but if this isnt set, set this to False
     )
+    print("Deployed the lottery smart contract!!!")
 
 def main():
     deploy_lottery()
