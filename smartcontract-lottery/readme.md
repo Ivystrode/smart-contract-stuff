@@ -31,4 +31,10 @@ The setup
 13. Create a helpful_scripts.py file to hold helpful scripts like get_account etc
 14. Create .env file with all private keys and api keys in
 15. in brownie-config.yaml add wallets: from_key: ${PRIVATE_KEY}
-16. 
+
+Testing on a testnet!
+1. Do testing - see test dir - unit tests are usually done on local dev chain and integration tests on testnet
+2. brownie test -k [functionname(if wanting to do one function)] --network [networkname]
+3. I did this with ropsten - making sure the project id is in .env and that config points to the dotenv file - make sure it skips if network.show_active is local/development
+4. Do some unit tests on local environment...se unit test file/folder
+5. Deploying to testnet to test

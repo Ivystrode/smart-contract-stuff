@@ -6,6 +6,7 @@ compiler:
     remappings:
       - '@chainlink=smartcontractkit/chainlink-brownie-contracts@1.1.1'
       - '@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.4.0'
+dotenv: .env
 networks:
   default: development
   development: 
@@ -17,6 +18,7 @@ networks:
     link_token: '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyhash: '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee: 100000000000000000
+    verify: True
   mainnet-fork:
     eth_usd_price_feed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419" 
 wallets:

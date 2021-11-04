@@ -1,4 +1,4 @@
-from brownie import network, accounts, config, MockV3Aggregator, VRFCoordinatorMock, LinkToken, Contract
+from brownie import network, accounts, config, MockV3Aggregator, VRFCoordinatorMock, LinkToken, Contract, interface
 from web3 import Web3
 
 DECIMALS = 18 # most cryptos (all ERC20) use 18
@@ -45,18 +45,25 @@ def get_contract(contract_name):
     deployed version of this contract - ie MockV3Aggregator[-1])
     """
     contract_type = contract_to_mock[contract_name]
+    print(f"Get contract - checking {contract_type}")
     
     # check if we even need to deploy a mock - if we are on a local chain
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        print("Looking on the local chain...")
         if len(contract_type) <= 0: #eg if MockV3Aggregator.length is 0 ie none are deployed on the local chain yet
+            print(f"==={contract_type} not deployed - deploying===")
             deploy_mocks() 
+        else:
+            print("Contract already deployed")
             
         contract = contract_type[-1] # get the latest of that contract (eg MockV3Aggregator[-1]) - if we deployed above then it will be that one
     # for deploying to a testnet:
     else:
+        print("Checking network chain...")
         contract_address = config["networks"][network.show_active()][contract_name]
         # address & ABI
         contract = Contract.from_abi(contract_type._name, contract_address, contract_type._abi) # allows us to get a ctract from its abi and address
+        print("Contract found on network chain")
     return contract
             
     
@@ -66,8 +73,29 @@ def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_VALUE):
     Therefore we need to deploy them to the local chain so our contract
     will work in local testing
     """
-    
+    print("===deploying ALL mocks===")
     account = get_account()
     MockV3Aggregator.deploy(decimals, initial_value, {"from":account})
-    print("Deploy mock")
+    link_token = LinkToken.deploy({"from":account})
+    VRFCoordinatorMock.deploy(link_token, {"from":account})
+    print("Deployed mocks")
     
+def fund_with_link(contract_address, account=None, link_token=None, amount=100000000000000000): # 0.1 LINK?
+    account = account if account else get_account() # if a parameter was passed
+    link_token = link_token if link_token else get_contract("link_token") # again if the parameter was specified, otherwise find it
+    
+    tx = link_token.transfer(contract_address, amount, {"from":account}) # either this or use interfaces folder
+    
+    # if we dont have the whole contract we can just use an interface to interact with the contract
+    # find the interface and paste it in as a file to interfaces dir
+    # then use it like so:
+    # link_token_contract = interfaces.LinkTokenInterface(link_token.address)
+    # tx = link_token_contract.transfer(contract_address, amount, {"from":account})
+    
+    # so if we have the abi we can compile it and then use it using contract.from_abi
+    # if not we can just use the interface...
+    
+    tx.wait(1)
+    
+    print("Funded contract")
+    return tx

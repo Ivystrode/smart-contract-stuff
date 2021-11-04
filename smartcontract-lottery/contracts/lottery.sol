@@ -18,6 +18,7 @@ contract Lottery is VRFConsumerBase, Ownable {
         CALCULATING_WINNER
     }
     LOTTERY_STATE public lottery_state;
+    event RequestedRandomness(bytes32 requestId);
     uint256 public fee; // associated with the link token needed to pay for requests (for random number gen)
     bytes32 public keyhash; // keyhash - uniquely identifies a chainlink vrf node
 
@@ -56,9 +57,10 @@ contract Lottery is VRFConsumerBase, Ownable {
         // so we use chainlink VRF (Verifiable Randomness I think - https://docs.chain.link/docs/get-a-random-number/ - go to contracts section of VRF to select desired chain?)
         // see points 8-10 in readme
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
-        requestRandomness(keyhash, fee); // returns a bytes32 called requestId (see in VRFConsumerBase) - the name of this variable is dictated as a bytes32 called requestId
+        bytes32 requestId = requestRandomness(keyhash, fee); // returns a bytes32 called requestId (see in VRFConsumerBase) - the name of this variable is dictated as a bytes32 called requestId
         // the first transaction is this function that gives us the ID of our request. The oracle then calls a callback function that we need to define here
         // that gives us our random number - it has to be called fulfillRandomness as that is what it calls in the oracle
+        emit RequestedRandomness(requestId); // we can detect this in our tests
     }
 
     // internal somehow means only the VRF coordinator can call this function (since this contract called it...?)
