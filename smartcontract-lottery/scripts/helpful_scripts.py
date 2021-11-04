@@ -62,7 +62,7 @@ def get_contract(contract_name):
         print("Checking network chain...")
         contract_address = config["networks"][network.show_active()][contract_name]
         # address & ABI
-        contract = Contract.from_abi(contract_type._name, contract_address, contract_type._abi) # allows us to get a ctract from its abi and address
+        contract = Contract.from_abi(contract_type._name, contract_address, contract_type.abi) # allows us to get a ctract from its abi and address
         print("Contract found on network chain")
     return contract
             

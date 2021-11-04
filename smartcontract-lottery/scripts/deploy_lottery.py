@@ -4,8 +4,8 @@ from scripts import helpful_scripts
 from brownie import Lottery, network, config, MockV3Aggregator
 
 def deploy_lottery():
-    # account = helpful_scripts.get_account(id="eth_metamask")
-    account = helpful_scripts.get_account()
+    account = helpful_scripts.get_account(id="eth_metamask")
+    # account = helpful_scripts.get_account()
     net = network.show_active()
     print(f"=================NETWORK=================\n{net}\n========================================")
     lottery = Lottery.deploy(

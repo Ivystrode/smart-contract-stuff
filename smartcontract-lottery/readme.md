@@ -38,3 +38,12 @@ Testing on a testnet!
 3. I did this with ropsten - making sure the project id is in .env and that config points to the dotenv file - make sure it skips if network.show_active is local/development
 4. Do some unit tests on local environment...se unit test file/folder
 5. Deploying to testnet to test
+6. Integration tests file - run brownie test -k [if testing specific function - function name goes here] --network rinkeby (or another network)
+7. To deploy: brownie run scripts/deploy.py --network [name]
+8. Make sure using brownie accounts you add the id of the account to the deploy function parameters
+9. Make sure to include etherscan api key if publishing source/verifying
+
+10. conftest.py - python knows to look for this by default, it has a lot of testing configuration pieces in it
+
+Events
+1. On etherscan - as we look at the event for requestrandomness, the topic[0] is the hash that represents the evnet? and then the first "hex" is the requestId ()
