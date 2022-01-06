@@ -34,6 +34,51 @@ def main():
     # function getUserAccountData(address user)
     borrowable_eth, total_debt = get_borrowable_data(lending_pool, account)
     
+    print("lets borrow")
+    # GET ETH/DAI CONVERSION RATE
+    dat_eth_price = get_asset_price(config['networks'][network.show_active()]['dai_eth_price_feed']) # adress of LINK dai eth price feed address
+    
+    # convert borrowable eth to borrowable dai and timesing it by 95% because we dont want to get liquidated so we're more cautious
+    amount_dai_to_borrow = (1 / dat_eth_price) * (borrowable_eth * 0.95)
+    print("We are going to borrow this much DAI:")
+    print(amount_dai_to_borrow)
+    
+    print("Now to borrow...")
+    # get DAI address
+    # Kovan updates from time to time so the address may change
+    # for now it is 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD
+    dai_address = config['networks'][network.show_active()]['dai_token']
+    
+    borrow_tx = lending_pool.borrow(dai_address, Web3.toWei(amount_dai_to_borrow, "ether"), 1, 0, account.address, {"from": account})
+    borrow_tx.wait(1)
+    print("borrowed some DAI")
+    get_borrowable_data(lending_pool, account)
+    
+    # REPAY THE BORROWED ASSETS BACK
+    # commented out so we can see it on AAVE in kovan testnet
+    repay_all(amount, lending_pool, account)
+
+def repay_all(amount, lending_pool, account):
+    approve_erc20(Web3.toWei(amount, "ether"), lending_pool, config['networks'][network.show_active()]['dai_token'], account)
+    repay_tx = lending_pool.repay(config['networks'][network.show_active()]['dai_token'], amount, 1, account.address, {"from":account})
+    repay_tx.wait(1)
+    print("Repaid!!")
+    print("You just deposited, borrowed and repayed with AAVE, brownie and chainlink")
+
+def get_asset_price(price_feed_address):
+    """
+    Uses the LINK price feed address to get the conversion between two coins/tokens
+    In this example case the price of DAI in ETH
+    We get the ABI as usual by working directly with the interface - in this case AggregatorV3Interface
+    """
+    dai_eth_price_feed = interface.AggregatorV3Interface(price_feed_address)
+    # now dai eth price feed is a contract we can call functions on - ie get price data!
+    latest_price = dai_eth_price_feed.latestRoundData()[1] # price is at index 1
+    converted_latest_price = Web3.fromWei(latest_price, "ether")
+    print(f"DAI/ETH Price is {converted_latest_price}")
+    return float(converted_latest_price)
+    
+    
 def get_borrowable_data(lending_pool, account):
     """
     Get the summary of the account ie health factor, total debt, available borrows, liquidation threshold
