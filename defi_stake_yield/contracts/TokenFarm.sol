@@ -3,6 +3,7 @@ pragma solidity ^0.8.0; // safemath included by default?
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
 contract TokenFarm is Ownable {
 
@@ -24,12 +25,12 @@ contract TokenFarm is Ownable {
     // wd have to convert all of our ETH into DAI
 
     // we need to know the address of our reward token (DappToken)
-    constructor(ddress _dappTokenAddress) public {
+    constructor(address _dappTokenAddress) public {
         dappToken = IERC20(_dappTokenAddress); // now we can call functions on our dapptoken ie transfer etc
     }
 
     function setPriceFeedContract(address _token, address _priceFeed) public onlyOwner {
-        tokenPriceFeedMapping[_token] = _priceFeed
+        tokenPriceFeedMapping[_token] = _priceFeed;
     }
 
 
@@ -39,7 +40,10 @@ contract TokenFarm is Ownable {
             address recipient = stakers[stakersIndex];
             // send them a token reward based on their total value locked
             uint256 userTotalValue = getUserTotalValue(recipient);
-            dappToken.transfer(recipient, amount?);
+
+            // transfer the user an amount of tokens as reward based on their total value locked
+            // in this case, howevber much value they have staked on our platform, we will issue equal value in our token as a reward
+            dappToken.transfer(recipient, userTotalValue);
         }
     }
 
@@ -48,9 +52,11 @@ contract TokenFarm is Ownable {
         uint256 totalValue = 0;
         require(uniqueTokensStaked[_user] > 0, "No tokens staked!");
 
+        // loop over all the allowed tokens and if a user has any get the total value of them and add it to totalValue
         for (uint256 i = 0; i < allowedTokens.length; i++){
-            totalValue = totalValue + getUserSingleTokenValue(_user, allowedTokens[i])
+            totalValue = totalValue + getUserSingleTokenValue(_user, allowedTokens[i]);
         }
+        return totalValue;
     }
 
     function getUserSingleTokenValue(address _user, address _token) public view returns(uint256){
@@ -59,13 +65,25 @@ contract TokenFarm is Ownable {
             return 0; // dont watn the tx to revert if this is 0
 
             // price of the token * stakingBalance[_token][_user]
-            getTokenValue(_token);
+            (uint256 price, uint256 decimals) = getTokenValue(_token);
+
+            // take the amount of tokens the user has stacked...lets say 10 ETH
+            // take the price of ETH - in USD - therefore price feed contract is ETH/USD
+            // if ETH --> USD is $100;
+            // 10 ETH with its full decimansl is 10000000000000000000 (18 decimals I think)
+            // 10 ETH times $100 = $1000...but we also have to divide by the decimals otherwise we get a fuckhuge number
+            return (stakingBalance[_token][_user] * price / (10**decimals));
         }
     }
 
-    function getTokenValue(address _token) public view returns (uint256){
+    function getTokenValue(address _token) public view returns (uint256, uint256){
         // price feed address
         address priceFeedAddress = tokenPriceFeedMapping[_token];
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeedAddress);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // how many decimals the pricefeed has
+        uint256 decimals = priceFeed.decimals();
+        return (uint256(price), uint256(decimals)); // since decimals actually gives us a int/uint8 we wrap it into a uint256
     }
 
     function stakeTokens(uint256 _amount, address _token) public {
@@ -91,7 +109,18 @@ contract TokenFarm is Ownable {
         }
     }
 
-    function updateUniqueTokensStaked(address user, address token) internal {
+    function unstakeTokens(address _token) public {
+        // get the staked balance of the user
+        uint256 balance = stakingBalance[_token][msg.sender];
+        require(balance > 0, "Staking balance cannot be 0");
+        IERC20(_token).transfer(msg.sender, balance);
+        stakingBalance[_token][msg.sender] == 0;
+        // RE-ENTRANCY ATTACK VULN??
+        uniqueTokensStaked[msg.sender] == uniqueTokensStaked[msg.sender] - 1;
+        // remove this person from the stakers array if they have nothing stakced?
+    }
+
+    function updateUniqueTokensStaked(address _user, address _token) internal {
         // internal - only this contract can call this
         if (stakingBalance[_token][_user] <= 0) {
             uniqueTokensStaked[_user] = uniqueTokensStaked[_user] + 1;
