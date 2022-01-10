@@ -1,4 +1,4 @@
-from brownie import network, accounts, config, VRFCoordinatorMock, LinkToken, Contract
+from brownie import network, accounts, config, VRFCoordinatorMock, MockV3Aggregator, MockOracle, LinkToken, Contract, MockDAI, MockWETH
 
 FORKED_LOCAL_ENVIRONMENTS = ['mainnet-fork', 'mainnet-fork-dev']
 LOCAL_BLOCKCHAIN_ENVIRONMENTS = ['development','ganache-local']
@@ -9,6 +9,14 @@ OPENSEA_URL = 'https://testnets.opensea.io/assets/{}/{}'
 BREED_MAPPING = {0: "PUG",
                  1: "SHIBA_INU",
                  2: "ST_BERNARD"}
+
+# MOCK CONTRACT MAPPINGS:
+# we have to map the contract type to a name
+# anytime we see ["eth_usd_price_feed"] we know its a mockv3aggregator - we need to deploy a mock
+contract_to_mock = {"eth_usd_price_feed": MockV3Aggregator,
+                    "dai_usd_price_feed": MockV3Aggregator,
+                    "fau_token": MockDAI,
+                    "weth_token": MockWETH}
 
 def get_account(index=None, id=None):
     """
@@ -30,11 +38,7 @@ def get_account(index=None, id=None):
         print("live chain network")
         return accounts.add(config['wallets']['from_key'])
     
-# MOCK CONTRACT MAPPINGS:
-# we have to map the contract type to a name
-# anytime we see ["eth_usd_price_feed"] we know its a mockv3aggregator - we need to deploy a mock
-contract_to_mock = {"vrf_coordinator": VRFCoordinatorMock,
-                    "link_token": LinkToken}
+
     
 def get_contract(contract_name):
     """
@@ -77,7 +81,13 @@ def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_VALUE):
     print("===deploying ALL mocks===")
     account = get_account()
     link_token = LinkToken.deploy({"from":account})
-    VRFCoordinatorMock.deploy(link_token, {"from":account})
+    print(f"Link token deployed to {link_token.address}")
+    weth_token = MockWETH.deploy({"from":account})
+    print(f"WETH token deployed to {weth_token.address}")
+    dai_token = MockDAI.deploy({"from":account})
+    print(f"DAI token deployed to {dai_token.address}")
+    mock_price_feed = MockV3Aggregator.deploy(decimals, initial_value, {"from":account})
+    print(f"Mock V3 Aggregator deployed to {mock_price_feed.address}")
     print("Deployed mocks")
     
 def fund_with_link(contract_address, account=None, link_token=None, amount=100000000000000000): # 0.1 LINK?
