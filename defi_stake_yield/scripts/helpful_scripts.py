@@ -4,6 +4,7 @@ FORKED_LOCAL_ENVIRONMENTS = ['mainnet-fork', 'mainnet-fork-dev']
 LOCAL_BLOCKCHAIN_ENVIRONMENTS = ['development','ganache-local']
 DECIMALS = 18 # most cryptos (all ERC20) use 18
 INITIAL_VALUE = 200000000000
+INITIAL_PRICE_FEED_VALUE = 2000000000000000000000
 STARTING_PRICE = 200000000000
 OPENSEA_URL = 'https://testnets.opensea.io/assets/{}/{}'
 BREED_MAPPING = {0: "PUG",
@@ -31,12 +32,13 @@ def get_account(index=None, id=None):
     
     # if working on local chain use account[0]
     # this depends on what you specify when you run "brownie run scripts/deploy.py" if you add "--network ropsten" for example
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS or network.show_active() in FORKED_LOCAL_ENVIRONMENTS:
-        print("going with local")
+    if index:
+        return accounts[index]
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         return accounts[0]
-    else:
-        print("live chain network")
-        return accounts.add(config['wallets']['from_key'])
+    if id:
+        return accounts.load(id)
+    return accounts.add(config["wallets"]["from_key"])
     
 
     
@@ -72,7 +74,7 @@ def get_contract(contract_name):
     return contract
             
     
-def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_VALUE):
+def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_PRICE_FEED_VALUE):
     """
     If we are on a local chain we don't have access to oracles/price feeds
     Therefore we need to deploy them to the local chain so our contract

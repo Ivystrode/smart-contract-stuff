@@ -61,19 +61,20 @@ contract TokenFarm is Ownable {
 
     function getUserSingleTokenValue(address _user, address _token) public view returns(uint256){
         // if staked 1ETH at a price of 2kUSD we return 2000...etc
+        // get the value of all the tokens of type that the user has staked i.e. 1ETH at 2000USD returns 2000, 10 DAI at 10USD returns 100
         if(uniqueTokensStaked[_user] <= 0){
             return 0; // dont watn the tx to revert if this is 0
-
-            // price of the token * stakingBalance[_token][_user]
-            (uint256 price, uint256 decimals) = getTokenValue(_token);
-
-            // take the amount of tokens the user has stacked...lets say 10 ETH
-            // take the price of ETH - in USD - therefore price feed contract is ETH/USD
-            // if ETH --> USD is $100;
-            // 10 ETH with its full decimansl is 10000000000000000000 (18 decimals I think)
-            // 10 ETH times $100 = $1000...but we also have to divide by the decimals otherwise we get a fuckhuge number
-            return (stakingBalance[_token][_user] * price / (10**decimals));
         }
+
+        // price of the token * stakingBalance[_token][_user]
+        (uint256 price, uint256 decimals) = getTokenValue(_token);
+
+        // take the amount of tokens the user has stacked...lets say 10 ETH
+        // take the price of ETH - in USD - therefore price feed contract is ETH/USD
+        // if ETH --> USD is $100;
+        // 10 ETH with its full decimansl is 10000000000000000000 (18 decimals I think)
+        // 10 ETH times $100 = $1000...but we also have to divide by the decimals otherwise we get a fuckhuge number
+        return (stakingBalance[_token][_user] * price / (10**decimals));
     }
 
     function getTokenValue(address _token) public view returns (uint256, uint256){
@@ -83,7 +84,7 @@ contract TokenFarm is Ownable {
         (, int256 price,,,) = priceFeed.latestRoundData();
         // how many decimals the pricefeed has
         uint256 decimals = priceFeed.decimals();
-        return (uint256(price), uint256(decimals)); // since decimals actually gives us a int/uint8 we wrap it into a uint256
+        return (uint256(price), decimals); // since decimals actually gives us a int/uint8 we wrap it into a uint256
     }
 
     function stakeTokens(uint256 _amount, address _token) public {
