@@ -1,4 +1,6 @@
 from brownie import network, accounts, config, VRFCoordinatorMock, MockV3Aggregator, MockOracle, LinkToken, Contract, MockDAI, MockWETH
+from web3 import Web3
+
 
 FORKED_LOCAL_ENVIRONMENTS = ['mainnet-fork', 'mainnet-fork-dev']
 LOCAL_BLOCKCHAIN_ENVIRONMENTS = ['development','ganache-local']

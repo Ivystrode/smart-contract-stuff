@@ -50,7 +50,11 @@ contract TokenFarm is Ownable {
     function getUserTotalValue(address _user) public view returns(uint256) {
         // a lot of protocols just have people claiming tokens as it is a lot more gas efficient!
         uint256 totalValue = 0;
-        require(uniqueTokensStaked[_user] > 0, "No tokens staked!");
+        // removing this and replacing with if check as per pull request on the github
+        // require(uniqueTokensStaked[_user] > 0, "No tokens staked!");
+        if (uniqueTokensStaked[_user] <= 0) {
+            return 0;
+        }
 
         // loop over all the allowed tokens and if a user has any get the total value of them and add it to totalValue
         for (uint256 i = 0; i < allowedTokens.length; i++){
@@ -115,9 +119,11 @@ contract TokenFarm is Ownable {
         uint256 balance = stakingBalance[_token][msg.sender];
         require(balance > 0, "Staking balance cannot be 0");
         IERC20(_token).transfer(msg.sender, balance);
-        stakingBalance[_token][msg.sender] == 0;
+        // set the user's balance of this token on the platform to 0
+        stakingBalance[_token][msg.sender] = 0;
         // RE-ENTRANCY ATTACK VULN??
-        uniqueTokensStaked[msg.sender] == uniqueTokensStaked[msg.sender] - 1;
+        // minus 1 from the number of unique tokens the user has staked (this seems kind of basic way of doing this)
+        uniqueTokensStaked[msg.sender] = uniqueTokensStaked[msg.sender] - 1;
         // remove this person from the stakers array if they have nothing stakced?
     }
 
@@ -128,7 +134,7 @@ contract TokenFarm is Ownable {
         }
     }
 
-    function addAllowedTokens(address _token) public {
+    function addAllowedTokens(address _token) public onlyOwner {
         allowedTokens.push(_token);
     }
 

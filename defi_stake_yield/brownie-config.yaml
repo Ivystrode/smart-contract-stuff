@@ -17,3 +17,5 @@ networks:
     fau_token: '0xfab46e002bbf0b4509813474841e0716e6730136'
     dai_usd_price_feed: = '0x777A68032a88E5A84678A77Af2CD65A7b3c0775a'
     eth_usd_price_feed: '0x9326BFA02ADD2366b30bacB125260Af641031331'
+wallets:
+  from_key: ${ETH_METAMASK_KEY}
