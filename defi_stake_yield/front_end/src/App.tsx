@@ -7,13 +7,17 @@ import {Main} from "./components/main"
 function App() {
   return (
     <DAppProvider config={{
-      supportedChains: [ChainId.Kovan, ChainId.Rinkeby, 1337] // 1337 is ganache I think?
+      supportedChains: [ChainId.Kovan, ChainId.Rinkeby, 1337], // 1337 is ganache I think?
+      notifications: {
+        expirationPeriod: 1000, //ms, check every 1000ms
+        checkInterval: 1000
+      }
     }}>
       <Header></Header>
       <Container maxWidth="md">
-        <div>Ji</div>
-      </Container>
       <Main />
+      </Container>
+      
       
     </DAppProvider>
   );

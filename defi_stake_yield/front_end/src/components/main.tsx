@@ -3,9 +3,33 @@ import helperConfig from "../helper-config.json"
 import networkMapping from "../chain-info/deployments/map.json"
 import brownieConfig from "../brownie-config.json"
 import {constants} from "ethers"
+import dapp from "../dapp.png"
+import eth from "../eth.png"
+import dai from "../dai.png"
+import { YourWallet } from "./yourWallet/yourWallet"
+import { makeStyles } from "@material-ui/core"
+
+const useStyles = makeStyles((theme) => ({
+    title: {
+        color: theme.palette.common.white,
+        textAlign: "center",
+        padding: theme.spacing(4)
+    }
+}))
+
+// here we create "Token", which is a new "type"
+// later on we fill "supportedTokens" with a list of these "types"
+// and tell yourWallet.tsx what the tokens our platform supports are
+// by passing it as a parameter from this component
+export type Token = {
+    image: string
+    address: string
+    name: string 
+}
 
 
 export const Main = () => {
+    const classes = useStyles()
     // show tokens from the wallet
 
     // get the address of different tokens
@@ -30,8 +54,32 @@ export const Main = () => {
     console.log(wethTokenAddress)
     console.log(fauTokenAddress)
 
+    const supportedTokens: Array<Token> = [
+        {
+            image: dapp,
+            address: dappTokenAddress,
+            name: "DAPP"
+        },
+        {
+            image: eth,
+            address: wethTokenAddress,
+            name: "WETH"
+        },
+        {
+            image: dai,
+            address: fauTokenAddress,
+            name: "DAI"
+        }
+    ]
+
+    console.log(supportedTokens)
 
 
 
-    return <div>Main</div>
+
+    return (<>
+        <h2 className={classes.title}>Dapp Token App</h2>
+        <YourWallet supportedTokens={supportedTokens}/>
+        </>
+    )
 } 
